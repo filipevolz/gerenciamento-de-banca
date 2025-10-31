@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { authService } from '../services/authService';
 
 export interface AuthRequest extends Request {
@@ -17,7 +17,7 @@ export const authMiddleware = async (
       return res.status(401).json({ error: 'Token não fornecido' });
     }
 
-    const token = authHeader.substring(7); // Remove "Bearer " prefix
+    const token = authHeader.substring(7);
     const userId = await authService.validateToken(token);
 
     req.userId = userId;

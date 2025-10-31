@@ -1,6 +1,6 @@
-import { Response } from 'express';
+import type { Response } from 'express';
 import { apostaService } from '../services/apostaService';
-import { AuthRequest } from '../middleware/authMiddleware';
+import type { AuthRequest } from '../middleware/authMiddleware';
 import { bancaService } from '../services/bancaService';
 
 export class ApostaController {
@@ -29,7 +29,7 @@ export class ApostaController {
   async getAll(req: AuthRequest, res: Response) {
     try {
       const userId = req.userId;
-      const bancaId = req.query.bancaId as string | undefined;
+      const bancaId = req.query?.bancaId as string | undefined;
       
       // Se bancaId for fornecido, verificar se pertence ao usuário
       if (bancaId) {
@@ -136,7 +136,7 @@ export class ApostaController {
   async getEstatisticas(req: AuthRequest, res: Response) {
     try {
       const userId = req.userId;
-      const bancaId = req.query.bancaId as string | undefined;
+      const bancaId = req.query?.bancaId as string | undefined;
       
       // Se bancaId for fornecido, verificar se pertence ao usuário
       if (bancaId) {
@@ -158,7 +158,7 @@ export class ApostaController {
   async getMercados(req: AuthRequest, res: Response) {
     try {
       const userId = req.userId;
-      const bancaId = req.query.bancaId as string | undefined;
+      const bancaId = req.query?.bancaId as string | undefined;
       
       // Se bancaId for fornecido, verificar se pertence ao usuário
       if (bancaId) {

@@ -64,8 +64,11 @@ export class ApostaService {
         dataApostaDate = dto.dataAposta;
       } else {
         // Se for string "YYYY-MM-DD", criar Date no timezone local
-        const [year, month, day] = dto.dataAposta.split('-').map(Number);
-        dataApostaDate = new Date(year, month - 1, day);
+        const parts = dto.dataAposta.split('-').map(Number);
+        if (parts.length === 3) {
+          const [year, month, day] = parts;
+          dataApostaDate = new Date(year, month - 1, day);
+        }
       }
     }
 
@@ -91,7 +94,7 @@ export class ApostaService {
         dataAposta: dataApostaDate,
         modalidade: dto.modalidade,
         mercado: dto.mercado,
-        descricao: dto.descricao,
+        descricao: dto.descricao || null,
         odd: dto.odd,
         unidades: dto.unidades,
         stake,
@@ -291,8 +294,11 @@ export class ApostaService {
         dataApostaDate = dto.dataAposta;
       } else {
         // Se for string "YYYY-MM-DD", criar Date no timezone local
-        const [year, month, day] = dto.dataAposta.split('-').map(Number);
-        dataApostaDate = new Date(year, month - 1, day);
+        const parts = dto.dataAposta.split('-').map(Number);
+        if (parts.length === 3) {
+          const [year, month, day] = parts;
+          dataApostaDate = new Date(year, month - 1, day);
+        }
       }
     }
 
