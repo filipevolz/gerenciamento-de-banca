@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { casaApostaService } from '../services/casaApostaService';
 import { bancaService } from '../services/bancaService';
 import { apostaService } from '../services/apostaService';
@@ -12,7 +11,6 @@ interface BancaManagerProps {
 }
 
 export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
-  const { user } = useAuth();
   const [banca, setBanca] = useState<Banca | null>(null);
   const [casas, setCasas] = useState<CasaAposta[]>([]);
   const [apostas, setApostas] = useState<Aposta[]>([]);
@@ -20,7 +18,6 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
   const [isAddingCasa, setIsAddingCasa] = useState(false);
   const [editandoCasa, setEditandoCasa] = useState<string | null>(null);
   const [novaCasa, setNovaCasa] = useState({ nome: '', saldoAtual: 0, valorUnidade: 0 });
-  const [novaBanca, setNovaBanca] = useState({ nome: 'Minha Banca', saldoInicial: 0 });
 
   useEffect(() => {
     loadBancaAndCasas();
@@ -55,21 +52,6 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
       console.error('Erro ao carregar:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleCreateBanca = async () => {
-    if (!user?.id) {
-      console.log('❌ Usuário não autenticado');
-      return;
-    }
-
-    try {
-      await bancaService.create(novaBanca);
-      console.log('✅ Banca criada com sucesso!');
-      loadBancaAndCasas();
-    } catch (error: any) {
-      console.error('❌ Erro ao criar banca:', error.response?.data?.error || error.message);
     }
   };
 
