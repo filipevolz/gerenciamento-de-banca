@@ -171,7 +171,7 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nome da Banca
+                Nome da Casa de aposta
               </label>
               <input
                 type="text"

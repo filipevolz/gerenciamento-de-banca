@@ -56,6 +56,7 @@ export function ApostasPage() {
   const [filtroDataFinal, setFiltroDataFinal] = useState<Date | undefined>(undefined);
   const [filtroStatus, setFiltroStatus] = useState<string>('');
   const [filtroModalidade, setFiltroModalidade] = useState<string>('');
+  const [filtroCasa, setFiltroCasa] = useState<string>('');
 
   useEffect(() => {
     loadData();
@@ -221,6 +222,9 @@ export function ApostasPage() {
     // Filtro por modalidade
     if (filtroModalidade && aposta.modalidade !== filtroModalidade) return false;
 
+    // Filtro por casa
+    if (filtroCasa && aposta.casaApostaId !== filtroCasa) return false;
+
     return true;
   });
 
@@ -233,10 +237,11 @@ export function ApostasPage() {
     setFiltroDataFinal(undefined);
     setFiltroStatus('');
     setFiltroModalidade('');
+    setFiltroCasa('');
   };
 
   // Verificar se há filtros ativos
-  const temFiltrosAtivos = filtroDataInicial || filtroDataFinal || filtroStatus || filtroModalidade;
+  const temFiltrosAtivos = filtroDataInicial || filtroDataFinal || filtroStatus || filtroModalidade || filtroCasa;
 
   if (isLoading) {
     return <div className="text-center py-8">Carregando apostas...</div>;
@@ -300,7 +305,7 @@ export function ApostasPage() {
                   </button>
                 )}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Data Inicial
@@ -406,6 +411,34 @@ export function ApostasPage() {
                   {filtroModalidade && (
                     <button
                       onClick={() => setFiltroModalidade('')}
+                      className="mt-1 text-xs text-red-600 hover:text-red-700"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Casa
+                  </label>
+                  <Select 
+                    value={filtroCasa || undefined} 
+                    onValueChange={(value) => setFiltroCasa(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Todas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {casas.map((casa) => (
+                        <SelectItem key={casa.id} value={casa.id}>
+                          {casa.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {filtroCasa && (
+                    <button
+                      onClick={() => setFiltroCasa('')}
                       className="mt-1 text-xs text-red-600 hover:text-red-700"
                     >
                       Limpar
