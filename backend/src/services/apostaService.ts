@@ -63,11 +63,12 @@ export class ApostaService {
       if (dto.dataAposta instanceof Date) {
         dataApostaDate = dto.dataAposta;
       } else {
-        // Se for string "YYYY-MM-DD", criar Date no timezone local
+        // Se for string "YYYY-MM-DD", criar Date em UTC para evitar problemas de timezone
         const parts = dto.dataAposta.split('-').map(Number);
         if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
           const [year, month, day] = parts;
-          dataApostaDate = new Date(year, month - 1, day);
+          // Criar data em UTC (meio-dia UTC para evitar problemas de timezone)
+          dataApostaDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0, 0));
         }
       }
     }
@@ -293,11 +294,12 @@ export class ApostaService {
       if (dto.dataAposta instanceof Date) {
         dataApostaDate = dto.dataAposta;
       } else {
-        // Se for string "YYYY-MM-DD", criar Date no timezone local
+        // Se for string "YYYY-MM-DD", criar Date em UTC para evitar problemas de timezone
         const parts = dto.dataAposta.split('-').map(Number);
         if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
           const [year, month, day] = parts;
-          dataApostaDate = new Date(year, month - 1, day);
+          // Criar data em UTC (meio-dia UTC para evitar problemas de timezone)
+          dataApostaDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0, 0));
         }
       }
     }

@@ -12,7 +12,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
-import { Pencil, Check, X, RotateCcw, Trash2, LogOut } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '../components/ui/popover';
+import { Calendar } from '../components/ui/calendar';
+import { Button } from '../components/ui/button';
+import { Pencil, Check, X, RotateCcw, Trash2, LogOut, Filter, XCircle, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale/pt-BR';
 
 export function ApostasPage() {
   const { user, logout } = useAuth();
@@ -34,6 +50,12 @@ export function ApostasPage() {
     status: 'pendente' as StatusAposta
   });
   const [showMercadosSugeridos, setShowMercadosSugeridos] = useState(false);
+  
+  // Filtros
+  const [filtroDataInicial, setFiltroDataInicial] = useState<Date | undefined>(undefined);
+  const [filtroDataFinal, setFiltroDataFinal] = useState<Date | undefined>(undefined);
+  const [filtroStatus, setFiltroStatus] = useState<string>('');
+  const [filtroModalidade, setFiltroModalidade] = useState<string>('');
 
   useEffect(() => {
     loadData();
@@ -176,6 +198,46 @@ export function ApostasPage() {
     }
   };
 
+  // Filtrar apostas
+  const apostasFiltradas = apostas.filter((aposta) => {
+    const dataAposta = new Date(aposta.dataAposta);
+    
+    // Filtro por intervalo de data
+    if (filtroDataInicial) {
+      const dataInicial = new Date(filtroDataInicial);
+      dataInicial.setHours(0, 0, 0, 0);
+      if (dataAposta < dataInicial) return false;
+    }
+
+    if (filtroDataFinal) {
+      const dataFinal = new Date(filtroDataFinal);
+      dataFinal.setHours(23, 59, 59, 999);
+      if (dataAposta > dataFinal) return false;
+    }
+
+    // Filtro por status
+    if (filtroStatus && aposta.status !== filtroStatus) return false;
+
+    // Filtro por modalidade
+    if (filtroModalidade && aposta.modalidade !== filtroModalidade) return false;
+
+    return true;
+  });
+
+  // Extrair modalidades únicas para o select
+  const modalidadesUnicas = Array.from(new Set(apostas.map(a => a.modalidade))).sort();
+
+  // Limpar filtros
+  const limparFiltros = () => {
+    setFiltroDataInicial(undefined);
+    setFiltroDataFinal(undefined);
+    setFiltroStatus('');
+    setFiltroModalidade('');
+  };
+
+  // Verificar se há filtros ativos
+  const temFiltrosAtivos = filtroDataInicial || filtroDataFinal || filtroStatus || filtroModalidade;
+
   if (isLoading) {
     return <div className="text-center py-8">Carregando apostas...</div>;
   }
@@ -221,6 +283,141 @@ export function ApostasPage() {
               >
                 {isAddingAposta ? 'Cancelar' : '+ Nova Aposta'}
               </button>
+            </div>
+
+            {/* Filtros */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center gap-3 mb-4">
+                <Filter className="w-5 h-5 text-gray-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
+                {temFiltrosAtivos && (
+                  <button
+                    onClick={limparFiltros}
+                    className="ml-auto flex items-center gap-2 px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    Limpar Filtros
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Data Inicial
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {filtroDataInicial ? (
+                          format(filtroDataInicial, "dd/MM/yyyy", { locale: ptBR })
+                        ) : (
+                          <span className="text-gray-500">Selecione...</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={filtroDataInicial}
+                        onSelect={setFiltroDataInicial}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Data Final
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {filtroDataFinal ? (
+                          format(filtroDataFinal, "dd/MM/yyyy", { locale: ptBR })
+                        ) : (
+                          <span className="text-gray-500">Selecione...</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={filtroDataFinal}
+                        onSelect={setFiltroDataFinal}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <Select 
+                    value={filtroStatus || undefined} 
+                    onValueChange={(value) => setFiltroStatus(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="green">Green</SelectItem>
+                      <SelectItem value="red">Red</SelectItem>
+                      <SelectItem value="reembolso">Reembolso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {filtroStatus && (
+                    <button
+                      onClick={() => setFiltroStatus('')}
+                      className="mt-1 text-xs text-red-600 hover:text-red-700"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Modalidade
+                  </label>
+                  <Select 
+                    value={filtroModalidade || undefined} 
+                    onValueChange={(value) => setFiltroModalidade(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Todas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {modalidadesUnicas.map((modalidade) => (
+                        <SelectItem key={modalidade} value={modalidade}>
+                          {modalidade}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {filtroModalidade && (
+                    <button
+                      onClick={() => setFiltroModalidade('')}
+                      className="mt-1 text-xs text-red-600 hover:text-red-700"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+              </div>
+              {temFiltrosAtivos && (
+                <div className="mt-3 text-sm text-gray-600">
+                  Mostrando {apostasFiltradas.length} de {apostas.length} apostas
+                </div>
+              )}
             </div>
 
             {isAddingAposta && (
@@ -401,9 +598,19 @@ export function ApostasPage() {
                 <p className="text-lg mb-2">Nenhuma aposta cadastrada</p>
                 <p className="text-sm">Clique em "Nova Aposta" para começar</p>
               </div>
+            ) : apostasFiltradas.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <p className="text-lg mb-2">Nenhuma aposta encontrada com os filtros aplicados</p>
+                <button
+                  onClick={limparFiltros}
+                  className="text-indigo-600 hover:text-indigo-700 font-medium"
+                >
+                  Limpar filtros
+                </button>
+              </div>
             ) : (
               <div className="space-y-3">
-                {apostas.map((aposta) => (
+                {apostasFiltradas.map((aposta) => (
                   <div key={aposta.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
