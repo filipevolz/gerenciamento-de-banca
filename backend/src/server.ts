@@ -17,7 +17,7 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // Permitir requisições sem origin (mobile apps, Postman, etc) apenas em desenvolvimento
     if (!origin) {
       if (process.env.NODE_ENV === 'development') {

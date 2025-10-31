@@ -1,6 +1,6 @@
-import { Response } from 'express';
+import type { Response } from 'express';
 import { bancaService } from '../services/bancaService';
-import { AuthRequest } from '../middleware/authMiddleware';
+import type { AuthRequest } from '../middleware/authMiddleware';
 
 export class BancaController {
   async create(req: AuthRequest, res: Response) {

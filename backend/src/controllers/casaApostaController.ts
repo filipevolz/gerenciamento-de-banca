@@ -1,6 +1,6 @@
-import { Response } from 'express';
+import type { Response } from 'express';
 import { casaApostaService } from '../services/casaApostaService';
-import { AuthRequest } from '../middleware/authMiddleware';
+import type { AuthRequest } from '../middleware/authMiddleware';
 import { bancaService } from '../services/bancaService';
 
 export class CasaApostaController {

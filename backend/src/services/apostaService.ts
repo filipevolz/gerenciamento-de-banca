@@ -330,7 +330,7 @@ export class ApostaService {
         dataAposta: dataApostaDate,
         modalidade: dto.modalidade !== undefined ? dto.modalidade : aposta.modalidade,
         mercado: dto.mercado !== undefined ? dto.mercado : aposta.mercado,
-        descricao: dto.descricao !== undefined ? dto.descricao : aposta.descricao,
+        descricao: dto.descricao !== undefined ? (dto.descricao || null) : aposta.descricao,
         odd,
         unidades,
         stake,
