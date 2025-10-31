@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { apostaService } from '../services/apostaService';
 import { casaApostaService } from '../services/casaApostaService';
 import type { Aposta, StatusAposta } from '../services/apostaService';
