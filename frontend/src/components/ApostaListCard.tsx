@@ -20,7 +20,6 @@ interface Props {
 
 export function ApostaListCard({ bancaId, onApostaChange }: Props) {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [apostas, setApostas] = useState<Aposta[]>([]);
   const [casas, setCasas] = useState<CasaAposta[]>([]);
   const [mercadosSugeridos, setMercadosSugeridos] = useState<string[]>([]);

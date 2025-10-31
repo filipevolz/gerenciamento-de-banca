@@ -18,7 +18,6 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
   const [apostas, setApostas] = useState<Aposta[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingCasa, setIsAddingCasa] = useState(false);
-  const [isCreatingBanca, setIsCreatingBanca] = useState(false);
   const [editandoCasa, setEditandoCasa] = useState<string | null>(null);
   const [novaCasa, setNovaCasa] = useState({ nome: '', saldoAtual: 0, valorUnidade: 0 });
   const [novaBanca, setNovaBanca] = useState({ nome: 'Minha Banca', saldoInicial: 0 });
@@ -60,7 +59,6 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
       await bancaService.create(novaBanca, user.id);
       console.log('✅ Banca criada com sucesso!');
       loadBancaAndCasas();
-      setIsCreatingBanca(false);
     } catch (error: any) {
       console.error('❌ Erro ao criar banca:', error.response?.data?.error || error.message);
     }

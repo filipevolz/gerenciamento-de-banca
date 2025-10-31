@@ -11,7 +11,6 @@ interface Props {
 }
 
 export function ApostaManager({ bancaId, onApostaChange }: Props) {
-  const { user } = useAuth();
   const [apostas, setApostas] = useState<Aposta[]>([]);
   const [casas, setCasas] = useState<CasaAposta[]>([]);
   const [isLoading, setIsLoading] = useState(true);
