@@ -65,7 +65,7 @@ export class ApostaService {
       } else {
         // Se for string "YYYY-MM-DD", criar Date no timezone local
         const parts = dto.dataAposta.split('-').map(Number);
-        if (parts.length === 3) {
+        if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
           const [year, month, day] = parts;
           dataApostaDate = new Date(year, month - 1, day);
         }
@@ -295,7 +295,7 @@ export class ApostaService {
       } else {
         // Se for string "YYYY-MM-DD", criar Date no timezone local
         const parts = dto.dataAposta.split('-').map(Number);
-        if (parts.length === 3) {
+        if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
           const [year, month, day] = parts;
           dataApostaDate = new Date(year, month - 1, day);
         }

@@ -52,6 +52,9 @@ export class ApostaController {
     try {
       const userId = req.userId;
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       const aposta = await apostaService.getById(id);
       
       // Verificar se a aposta pertence a uma banca do usuário
@@ -72,6 +75,9 @@ export class ApostaController {
     try {
       const userId = req.userId;
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       
       // Verificar se a aposta pertence ao usuário
       const aposta = await apostaService.getById(id);
@@ -94,6 +100,9 @@ export class ApostaController {
     try {
       const userId = req.userId;
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       
       // Verificar se a aposta pertence ao usuário
       const aposta = await apostaService.getById(id);
@@ -116,6 +125,9 @@ export class ApostaController {
     try {
       const userId = req.userId;
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       
       // Verificar se a aposta pertence ao usuário
       const aposta = await apostaService.getById(id);

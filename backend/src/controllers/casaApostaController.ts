@@ -52,6 +52,9 @@ export class CasaApostaController {
     try {
       const userId = req.userId;
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       const casa = await casaApostaService.getById(id);
       
       // Verificar se a casa pertence a uma banca do usuário
@@ -72,6 +75,9 @@ export class CasaApostaController {
     try {
       const userId = req.userId;
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       
       // Verificar se a casa pertence ao usuário
       const casa = await casaApostaService.getById(id);
@@ -94,6 +100,9 @@ export class CasaApostaController {
     try {
       const userId = req.userId;
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       
       // Verificar se a casa pertence ao usuário
       const casa = await casaApostaService.getById(id);

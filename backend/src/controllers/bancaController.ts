@@ -37,6 +37,9 @@ export class BancaController {
   async getById(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       const userId = req.userId;
       const banca = await bancaService.getById(id);
       
@@ -56,6 +59,9 @@ export class BancaController {
   async update(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       const userId = req.userId;
       
       // Verificar se a banca pertence ao usuário
@@ -77,6 +83,9 @@ export class BancaController {
   async delete(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
       const userId = req.userId;
       
       // Verificar se a banca pertence ao usuário
