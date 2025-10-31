@@ -10,9 +10,17 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middlewares - CORS configurado para aceitar requisições do frontend
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'https://filipevolz.github.io',
+];
+
 app.use(cors({
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // Permitir requisições sem origin (mobile apps, Postman, etc)
+    // Permitir requisições sem origin (mobile apps, Postman, curl, etc)
     if (!origin) {
       return callback(null, true);
     }
@@ -22,16 +30,25 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // Permitir qualquer domínio do GitHub Pages (https://*.github.io)
-    if (origin.includes('.github.io')) {
+    // Permitir origens específicas do GitHub Pages
+    if (origin === 'https://filipevolz.github.io' || origin.includes('.github.io')) {
+      console.log('CORS allowed origin:', origin);
+      return callback(null, true);
+    }
+    
+    // Verificar se está na lista de origens permitidas
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     
     // Log para debug
     console.log('CORS blocked origin:', origin);
-    callback(new Error('Not allowed by CORS'));
+    callback(null, false); // Passar false em vez de Error para permitir que o CORS retorne 403
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
+  exposedHeaders: ['Authorization'],
 }));
 app.use(express.json());
 
