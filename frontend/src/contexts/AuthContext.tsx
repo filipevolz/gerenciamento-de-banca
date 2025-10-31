@@ -48,6 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (data: RegisterData) => {
+    // Limpar dados anteriores antes de registrar novo usuário
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
     const response = await authService.register(data);
     localStorage.setItem('token', response.token);
     localStorage.setItem('user', JSON.stringify(response.usuario));

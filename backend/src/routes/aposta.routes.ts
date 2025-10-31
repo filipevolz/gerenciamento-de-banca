@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { apostaController } from '../controllers/apostaController';
+import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
+
+// Todas as rotas de apostas requerem autenticação
+router.use(authMiddleware);
 
 router.post('/', apostaController.create.bind(apostaController));
 router.get('/', apostaController.getAll.bind(apostaController));

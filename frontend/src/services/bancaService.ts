@@ -16,11 +16,8 @@ export type CreateBancaData = {
 };
 
 export const bancaService = {
-  async create(data: CreateBancaData, usuarioId: string): Promise<Banca> {
-    const response = await api.post<Banca>('/bancas', {
-      usuarioId,
-      ...data
-    });
+  async create(data: CreateBancaData): Promise<Banca> {
+    const response = await api.post<Banca>('/bancas', data);
     return response.data;
   },
 

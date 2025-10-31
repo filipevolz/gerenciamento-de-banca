@@ -1,10 +1,15 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { bancaService } from '../services/bancaService';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 export class BancaController {
-  async create(req: Request, res: Response) {
+  async create(req: AuthRequest, res: Response) {
     try {
-      const data = req.body;
+      const userId = req.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+      const data = { ...req.body, usuarioId: userId };
       const banca = await bancaService.create(data);
       res.status(201).json(banca);
     } catch (error) {
@@ -14,10 +19,13 @@ export class BancaController {
     }
   }
 
-  async getAll(req: Request, res: Response) {
+  async getAll(req: AuthRequest, res: Response) {
     try {
-      const usuarioId = req.query.usuarioId as string | undefined;
-      const bancas = await bancaService.getAll(usuarioId);
+      const userId = req.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+      const bancas = await bancaService.getAll(userId);
       res.json(bancas);
     } catch (error) {
       res.status(500).json({ 
@@ -26,10 +34,17 @@ export class BancaController {
     }
   }
 
-  async getById(req: Request, res: Response) {
+  async getById(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
+      const userId = req.userId;
       const banca = await bancaService.getById(id);
+      
+      // Verificar se a banca pertence ao usuário
+      if (banca.usuarioId !== userId) {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+      
       res.json(banca);
     } catch (error) {
       res.status(404).json({ 
@@ -38,12 +53,20 @@ export class BancaController {
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
+      const userId = req.userId;
+      
+      // Verificar se a banca pertence ao usuário
+      const banca = await bancaService.getById(id);
+      if (banca.usuarioId !== userId) {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+      
       const data = req.body;
-      const banca = await bancaService.update(id, data);
-      res.json(banca);
+      const bancaAtualizada = await bancaService.update(id, data);
+      res.json(bancaAtualizada);
     } catch (error) {
       res.status(400).json({ 
         error: error instanceof Error ? error.message : 'Erro ao atualizar banca' 
@@ -51,9 +74,17 @@ export class BancaController {
     }
   }
 
-  async delete(req: Request, res: Response) {
+  async delete(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
+      const userId = req.userId;
+      
+      // Verificar se a banca pertence ao usuário
+      const banca = await bancaService.getById(id);
+      if (banca.usuarioId !== userId) {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+      
       const result = await bancaService.delete(id);
       res.json(result);
     } catch (error) {

@@ -81,7 +81,7 @@ export class CasaApostaService {
       include: {
         banca: true,
         apostas: {
-          orderBy: { data: 'desc' },
+          orderBy: { dataAposta: 'desc' },
           take: 50 // Últimas 50 apostas
         }
       }

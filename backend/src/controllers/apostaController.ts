@@ -1,10 +1,22 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { apostaService } from '../services/apostaService';
+import { AuthRequest } from '../middleware/authMiddleware';
+import { bancaService } from '../services/bancaService';
 
 export class ApostaController {
-  async create(req: Request, res: Response) {
+  async create(req: AuthRequest, res: Response) {
     try {
+      const userId = req.userId;
       const data = req.body;
+      
+      // Verificar se a banca pertence ao usuário
+      if (data.bancaId) {
+        const banca = await bancaService.getById(data.bancaId);
+        if (banca.usuarioId !== userId) {
+          return res.status(403).json({ error: 'Acesso negado' });
+        }
+      }
+      
       const aposta = await apostaService.create(data);
       res.status(201).json(aposta);
     } catch (error) {
@@ -14,9 +26,19 @@ export class ApostaController {
     }
   }
 
-  async getAll(req: Request, res: Response) {
+  async getAll(req: AuthRequest, res: Response) {
     try {
+      const userId = req.userId;
       const bancaId = req.query.bancaId as string | undefined;
+      
+      // Se bancaId for fornecido, verificar se pertence ao usuário
+      if (bancaId) {
+        const banca = await bancaService.getById(bancaId);
+        if (banca.usuarioId !== userId) {
+          return res.status(403).json({ error: 'Acesso negado' });
+        }
+      }
+      
       const apostas = await apostaService.getAll(bancaId);
       res.json(apostas);
     } catch (error) {
@@ -26,10 +48,18 @@ export class ApostaController {
     }
   }
 
-  async getById(req: Request, res: Response) {
+  async getById(req: AuthRequest, res: Response) {
     try {
+      const userId = req.userId;
       const { id } = req.params;
       const aposta = await apostaService.getById(id);
+      
+      // Verificar se a aposta pertence a uma banca do usuário
+      const banca = await bancaService.getById(aposta.bancaId);
+      if (banca.usuarioId !== userId) {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+      
       res.json(aposta);
     } catch (error) {
       res.status(404).json({ 
@@ -38,12 +68,21 @@ export class ApostaController {
     }
   }
 
-  async updateStatus(req: Request, res: Response) {
+  async updateStatus(req: AuthRequest, res: Response) {
     try {
+      const userId = req.userId;
       const { id } = req.params;
+      
+      // Verificar se a aposta pertence ao usuário
+      const aposta = await apostaService.getById(id);
+      const banca = await bancaService.getById(aposta.bancaId);
+      if (banca.usuarioId !== userId) {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+      
       const data = req.body;
-      const aposta = await apostaService.updateStatus(id, data);
-      res.json(aposta);
+      const apostaAtualizada = await apostaService.updateStatus(id, data);
+      res.json(apostaAtualizada);
     } catch (error) {
       res.status(400).json({ 
         error: error instanceof Error ? error.message : 'Erro ao atualizar aposta' 
@@ -51,12 +90,21 @@ export class ApostaController {
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(req: AuthRequest, res: Response) {
     try {
+      const userId = req.userId;
       const { id } = req.params;
+      
+      // Verificar se a aposta pertence ao usuário
+      const aposta = await apostaService.getById(id);
+      const banca = await bancaService.getById(aposta.bancaId);
+      if (banca.usuarioId !== userId) {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+      
       const data = req.body;
-      const aposta = await apostaService.update(id, data);
-      res.json(aposta);
+      const apostaAtualizada = await apostaService.update(id, data);
+      res.json(apostaAtualizada);
     } catch (error) {
       res.status(400).json({ 
         error: error instanceof Error ? error.message : 'Erro ao atualizar aposta' 
@@ -64,9 +112,18 @@ export class ApostaController {
     }
   }
 
-  async delete(req: Request, res: Response) {
+  async delete(req: AuthRequest, res: Response) {
     try {
+      const userId = req.userId;
       const { id } = req.params;
+      
+      // Verificar se a aposta pertence ao usuário
+      const aposta = await apostaService.getById(id);
+      const banca = await bancaService.getById(aposta.bancaId);
+      if (banca.usuarioId !== userId) {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+      
       const result = await apostaService.delete(id);
       res.json(result);
     } catch (error) {
@@ -76,9 +133,19 @@ export class ApostaController {
     }
   }
 
-  async getEstatisticas(req: Request, res: Response) {
+  async getEstatisticas(req: AuthRequest, res: Response) {
     try {
+      const userId = req.userId;
       const bancaId = req.query.bancaId as string | undefined;
+      
+      // Se bancaId for fornecido, verificar se pertence ao usuário
+      if (bancaId) {
+        const banca = await bancaService.getById(bancaId);
+        if (banca.usuarioId !== userId) {
+          return res.status(403).json({ error: 'Acesso negado' });
+        }
+      }
+      
       const estatisticas = await apostaService.getEstatisticas(bancaId);
       res.json(estatisticas);
     } catch (error) {
@@ -88,9 +155,19 @@ export class ApostaController {
     }
   }
 
-  async getMercados(req: Request, res: Response) {
+  async getMercados(req: AuthRequest, res: Response) {
     try {
+      const userId = req.userId;
       const bancaId = req.query.bancaId as string | undefined;
+      
+      // Se bancaId for fornecido, verificar se pertence ao usuário
+      if (bancaId) {
+        const banca = await bancaService.getById(bancaId);
+        if (banca.usuarioId !== userId) {
+          return res.status(403).json({ error: 'Acesso negado' });
+        }
+      }
+      
       const mercados = await apostaService.getMercadosUnicos(bancaId);
       res.json(mercados);
     } catch (error) {

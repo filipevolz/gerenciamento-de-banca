@@ -36,6 +36,7 @@ export function ApostaListCard({ bancaId, onApostaChange }: Props) {
     status: 'pendente' as StatusAposta
   });
   const [showMercadosSugeridos, setShowMercadosSugeridos] = useState(false);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     loadData();
@@ -61,13 +62,15 @@ export function ApostaListCard({ bancaId, onApostaChange }: Props) {
   };
 
   const handleAddAposta = async () => {
+    setError(''); // Limpar erro anterior
+    
     if (casas.length === 0) {
-      console.log('❌ Você precisa cadastrar uma casa de aposta antes de criar apostas!');
+      setError('❌ Você precisa cadastrar uma banca antes de criar apostas!');
       return;
     }
 
     if (!novaAposta.modalidade || !novaAposta.mercado || !novaAposta.casaApostaId) {
-      console.log('❌ Preencha todos os campos obrigatórios');
+      setError('❌ Preencha todos os campos obrigatórios');
       return;
     }
 
@@ -76,7 +79,7 @@ export function ApostaListCard({ bancaId, onApostaChange }: Props) {
         ...novaAposta,
         bancaId
       });
-      console.log('✅ Aposta criada com sucesso!');
+      setError(''); // Limpar erro ao sucesso
       setNovaAposta({
         casaApostaId: '',
         dataAposta: new Date().toISOString().split('T')[0],
@@ -91,7 +94,7 @@ export function ApostaListCard({ bancaId, onApostaChange }: Props) {
       loadData();
       onApostaChange?.();
     } catch (error: any) {
-      console.error('❌ Erro ao criar aposta:', error.response?.data?.error || error.message);
+      setError(error.response?.data?.error || error.message || '❌ Erro ao criar aposta');
     }
   };
 
@@ -119,14 +122,16 @@ export function ApostaListCard({ bancaId, onApostaChange }: Props) {
 
   const handleUpdateAposta = async () => {
     if (!editandoAposta) return;
+    setError(''); // Limpar erro anterior
+    
     if (!novaAposta.modalidade || !novaAposta.mercado || !novaAposta.casaApostaId) {
-      console.log('❌ Preencha todos os campos obrigatórios');
+      setError('❌ Preencha todos os campos obrigatórios');
       return;
     }
 
     try {
       await apostaService.update(editandoAposta, novaAposta);
-      console.log('✅ Aposta atualizada com sucesso!');
+      setError(''); // Limpar erro ao sucesso
       setNovaAposta({
         casaApostaId: '',
         dataAposta: new Date().toISOString().split('T')[0],
@@ -141,7 +146,7 @@ export function ApostaListCard({ bancaId, onApostaChange }: Props) {
       loadData();
       onApostaChange?.();
     } catch (error: any) {
-      console.error('❌ Erro ao atualizar aposta:', error.response?.data?.error || error.message);
+      setError(error.response?.data?.error || error.message || '❌ Erro ao atualizar aposta');
     }
   };
 
@@ -186,7 +191,10 @@ export function ApostaListCard({ bancaId, onApostaChange }: Props) {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Minhas Apostas</h2>
         <button
-          onClick={() => setIsAddingAposta(!isAddingAposta)}
+          onClick={() => {
+            setIsAddingAposta(!isAddingAposta);
+            setError(''); // Limpar erro ao cancelar
+          }}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
         >
           {isAddingAposta ? 'Cancelar' : '+ Nova Aposta'}
@@ -196,6 +204,12 @@ export function ApostaListCard({ bancaId, onApostaChange }: Props) {
       {(isAddingAposta || editandoAposta) && (
         <div className="mb-6 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
           <h3 className="font-semibold text-gray-900 mb-4">{editandoAposta ? 'Editar Aposta' : 'Nova Aposta'}</h3>
+          
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-800 text-sm font-semibold">{error}</p>
+            </div>
+          )}
           
           {casas.length === 0 && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -364,19 +378,20 @@ export function ApostaListCard({ bancaId, onApostaChange }: Props) {
             </button>
             {editandoAposta && (
               <button
-                onClick={() => {
-                  setEditandoAposta(null);
-                  setNovaAposta({
-                    casaApostaId: '',
-                    dataAposta: new Date().toISOString().split('T')[0],
-                    modalidade: '',
-                    mercado: '',
-                    descricao: '',
-                    odd: 0,
-                    unidades: 0,
-                    status: 'pendente'
-                  });
-                }}
+              onClick={() => {
+                setEditandoAposta(null);
+                setError('');
+                setNovaAposta({
+                  casaApostaId: '',
+                  dataAposta: new Date().toISOString().split('T')[0],
+                  modalidade: '',
+                  mercado: '',
+                  descricao: '',
+                  odd: 0,
+                  unidades: 0,
+                  status: 'pendente'
+                });
+              }}
                 className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
               >
                 Cancelar

@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { casaApostaController } from '../controllers/casaApostaController';
+import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
+
+// Todas as rotas de casas de aposta requerem autenticação
+router.use(authMiddleware);
 
 router.post('/', casaApostaController.create.bind(casaApostaController));
 router.get('/', casaApostaController.getAll.bind(casaApostaController));

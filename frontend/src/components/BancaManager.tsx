@@ -31,17 +31,26 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
       setIsLoading(true);
       // Buscar bancas do usuário
       const bancas = await bancaService.getAll();
+      let minhaBanca: Banca;
+      
       if (bancas.length > 0) {
-        const minhaBanca = bancas[0];
-        setBanca(minhaBanca);
-        const [data, apostasData] = await Promise.all([
-          casaApostaService.getAll(minhaBanca.id),
-          apostaService.getAll(minhaBanca.id)
-        ]);
-        setCasas(data);
-        setApostas(apostasData);
-        onBancaLoaded?.(minhaBanca.id);
+        minhaBanca = bancas[0];
+      } else {
+        // Criar banca automaticamente se não existir
+        minhaBanca = await bancaService.create({
+          nome: 'Minha Banca',
+          saldoInicial: 0
+        });
       }
+      
+      setBanca(minhaBanca);
+      const [data, apostasData] = await Promise.all([
+        casaApostaService.getAll(minhaBanca.id),
+        apostaService.getAll(minhaBanca.id)
+      ]);
+      setCasas(data);
+      setApostas(apostasData);
+      onBancaLoaded?.(minhaBanca.id);
     } catch (error) {
       console.error('Erro ao carregar:', error);
     } finally {
@@ -56,7 +65,7 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
     }
 
     try {
-      await bancaService.create(novaBanca, user.id);
+      await bancaService.create(novaBanca);
       console.log('✅ Banca criada com sucesso!');
       loadBancaAndCasas();
     } catch (error: any) {
@@ -66,7 +75,7 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
 
   const handleAddCasa = async () => {
     if (!novaCasa.nome.trim()) {
-      console.log('❌ Digite o nome da casa de aposta');
+      console.log('❌ Digite o nome da banca');
       return;
     }
 
@@ -82,12 +91,12 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
         saldoAtual: novaCasa.saldoAtual,
         valorUnidade: novaCasa.valorUnidade
       });
-      console.log('✅ Casa de aposta adicionada com sucesso!');
+      console.log('✅ Banca adicionada com sucesso!');
       setNovaCasa({ nome: '', saldoAtual: 0, valorUnidade: 0 });
       setIsAddingCasa(false);
       loadBancaAndCasas();
     } catch (error: any) {
-      console.error('❌ Erro ao adicionar casa de aposta:', error.response?.data?.error || error.message);
+      console.error('❌ Erro ao adicionar banca:', error.response?.data?.error || error.message);
     }
   };
 
@@ -99,7 +108,7 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
 
   const handleUpdateCasa = async () => {
     if (!novaCasa.nome.trim()) {
-      console.log('❌ Digite o nome da casa de aposta');
+      console.log('❌ Digite o nome da banca');
       return;
     }
 
@@ -111,26 +120,26 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
         saldoAtual: novaCasa.saldoAtual,
         valorUnidade: novaCasa.valorUnidade
       });
-      console.log('✅ Casa atualizada com sucesso!');
+      console.log('✅ Banca atualizada com sucesso!');
       setNovaCasa({ nome: '', saldoAtual: 0, valorUnidade: 0 });
       setEditandoCasa(null);
       loadBancaAndCasas();
     } catch (error: any) {
-      console.error('❌ Erro ao atualizar casa de aposta:', error.response?.data?.error || error.message);
+      console.error('❌ Erro ao atualizar banca:', error.response?.data?.error || error.message);
     }
   };
 
   const handleDeleteCasa = async (id: string, nome: string) => {
-    if (!window.confirm(`Deseja realmente excluir a casa "${nome}"?`)) {
+    if (!window.confirm(`Deseja realmente excluir a banca "${nome}"?`)) {
       return;
     }
 
     try {
       await casaApostaService.delete(id);
-      console.log('✅ Casa de aposta deletada com sucesso!');
+      console.log('✅ Banca deletada com sucesso!');
       loadBancaAndCasas();
     } catch (error: any) {
-      console.error('❌ Erro ao deletar casa de aposta:', error.response?.data?.error || error.message);
+      console.error('❌ Erro ao deletar banca:', error.response?.data?.error || error.message);
     }
   };
 
@@ -143,44 +152,9 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
     return <div className="text-center py-8">Carregando...</div>;
   }
 
-  // Se não tem banca, mostrar formulário para criar
+  // Se não tem banca ainda, mostrar loading (está sendo criada)
   if (!banca) {
-    return (
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Criar Minha Banca</h2>
-        <div className="max-w-md space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nome da Banca
-            </label>
-            <input
-              type="text"
-              value={novaBanca.nome}
-              onChange={(e) => setNovaBanca({ ...novaBanca, nome: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Saldo Inicial (R$)
-            </label>
-            <input
-              type="number"
-              value={novaBanca.saldoInicial || ''}
-              onChange={(e) => setNovaBanca({ ...novaBanca, saldoInicial: parseFloat(e.target.value) || 0 })}
-              step="0.01"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <button
-            onClick={handleCreateBanca}
-            className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition"
-          >
-            Criar Banca
-          </button>
-        </div>
-      </div>
-    );
+    return <div className="text-center py-8">Carregando...</div>;
   }
 
   const saldoTotal = casas.reduce((sum, casa) => sum + casa.saldoAtual, 0);
@@ -198,24 +172,24 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
   return (
     <div className="bg-white rounded-xl shadow-lg p-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Casas de Aposta</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Banca</h2>
         <button
           onClick={() => setIsAddingCasa(!isAddingCasa)}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
         >
-          {isAddingCasa ? 'Cancelar' : '+ Adicionar Casa'}
+          {isAddingCasa ? 'Cancelar' : '+ Adicionar Banca'}
         </button>
       </div>
 
       {(isAddingCasa || editandoCasa) && (
         <div className="mb-6 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
           <h3 className="font-semibold text-gray-900 mb-4">
-            {editandoCasa ? 'Editar Casa de Aposta' : 'Nova Casa de Aposta'}
+            {editandoCasa ? 'Editar Banca' : 'Nova Banca'}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nome da Casa
+                Nome da Banca
               </label>
               <input
                 type="text"
@@ -257,7 +231,7 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
               onClick={editandoCasa ? handleUpdateCasa : handleAddCasa}
               className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
             >
-              {editandoCasa ? 'Atualizar' : 'Salvar'} Casa
+              {editandoCasa ? 'Atualizar' : 'Salvar'} Banca
             </button>
             <button
               onClick={() => {
@@ -279,16 +253,16 @@ export function BancaManager({ onBancaLoaded }: BancaManagerProps) {
             <p className="text-3xl font-bold">R$ {saldoTotal.toFixed(2)}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-indigo-100">{casas.length} Casa(s)</p>
+            <p className="text-sm text-indigo-100">{casas.length} Banca(s)</p>
           </div>
         </div>
       </div>
 
-      {/* Lista de Casas */}
+      {/* Lista de Bancas */}
       {casas.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
-          <p className="text-lg mb-2">Nenhuma casa de aposta cadastrada</p>
-          <p className="text-sm">Clique em "Adicionar Casa" para começar</p>
+          <p className="text-lg mb-2">Nenhuma banca cadastrada</p>
+          <p className="text-sm">Clique em "Adicionar Banca" para começar</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

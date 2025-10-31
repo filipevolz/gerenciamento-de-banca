@@ -58,7 +58,7 @@ export class BancaService {
       include: {
         usuario: true,
         apostas: {
-          orderBy: { data: 'desc' },
+          orderBy: { dataAposta: 'desc' },
           take: 50 // Últimas 50 apostas
         }
       }
