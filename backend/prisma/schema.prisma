@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        String    @id @default(uuid())
+  nome      String
+  email     String    @unique
+  senha     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bancas    Banca[]
+}
+
+model Banca {
+  id           String    @id @default(uuid())
+  usuarioId    String
+  nome         String
+  saldoInicial Float
+  saldoAtual   Float    @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  usuario     Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  casasAposta CasaAposta[]
+  apostas     Aposta[]
+  
+  @@index([usuarioId])
+}
+
+model CasaAposta {
+  id           String   @id @default(uuid())
+  bancaId      String
+  nome         String
+  saldoAtual   Float    @default(0)
+  valorUnidade Float    @default(0)  // Valor de 1 unidade em reais
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  banca    Banca    @relation(fields: [bancaId], references: [id], onDelete: Cascade)
+  apostas  Aposta[]
+  
+  @@index([bancaId])
+}
+
+model Aposta {
+  id             String    @id @default(uuid())
+  bancaId        String
+  casaApostaId   String?
+  
+  dataAposta     DateTime  @default(now())
+  modalidade     String    // "Futebol", "NBA", "NFL", etc.
+  mercado        String    // "Finalizações", "Desarmes", "Resultado", etc.
+  descricao      String?   // Descrição opcional da aposta
+  
+  odd            Float
+  unidades       Float     // Quantidade de unidades (0.5, 1, 2, etc.)
+  stake          Float     // Valor apostado (unidades * valorUnidade)
+  
+  status         String    @default("pendente") // "pendente", "green", "red", "reembolso"
+  
+  // Campos calculados
+  casaApostaNome String?   // Nome da casa para histórico
+  valorRetorno   Float?    // Valor retornado caso green
+  lucro          Float?    // Lucro líquido (pode ser negativo)
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  banca      Banca        @relation(fields: [bancaId], references: [id], onDelete: Cascade)
+  casaAposta CasaAposta?  @relation(fields: [casaApostaId], references: [id], onDelete: SetNull)
+  
+  @@index([bancaId])
+  @@index([casaApostaId])
+  @@index([dataAposta])
+}
